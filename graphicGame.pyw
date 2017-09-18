@@ -120,7 +120,7 @@ class Game(Frame):
     #update the display
     def upDate(self, event=None):
         self.labRemain.config(text='Remaining: '+str(self.remain))
-        self.labNb.config(text='Favtorize: '+str(self.nb))
+        self.labNb.config(text='Factorize: '+str(self.nb))
         partFact=str(self.nb)+" = "
         for i in range(0, len(self.known)):
             partFact+=str(self.known[i])
