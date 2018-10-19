@@ -11,6 +11,8 @@ class Game(Frame):
         self.nb, self.li=makeRandNb(nbPrimes, mini, maxi)
         self.known=[]
         self.remain=self.nb
+        self.time=0
+        self.running=True
         #options
         self.nbPrimes=nbPrimes
         self.mini=mini
@@ -39,7 +41,7 @@ class Game(Frame):
         self.nbPrimesVar.set(self.nbPrimes)
         self.nbPrimesEntr=Entry(self.op, textvariable=self.nbPrimesVar, width=8)
         self.nbPrimesEntr.grid(column=2, row=2)
-        self.nbPrimesEntr.bind('<Return>', self.upDateOptions)
+        self.nbPrimesEntr.bind('<KeyRelease>', self.upDateOptions)
         Label(self.op, text='Number of factors:').grid(column=0, row=2, \
                                                        sticky='e', columnspan=2)
         #minimum val for primes
@@ -47,7 +49,7 @@ class Game(Frame):
         self.miniVar.set(self.mini)
         self.miniEntr=Entry(self.op, textvariable=self.miniVar, width=8)
         self.miniEntr.grid(column=2, row=3)
-        self.miniEntr.bind('<Return>', self.upDateOptions)
+        self.miniEntr.bind('<KeyRelease>', self.upDateOptions)
         Label(self.op, text='Minimum value of the factors:').grid(column=0, \
                                                             row=3, columnspan=2)
         #maximum value for primes
@@ -55,7 +57,7 @@ class Game(Frame):
         self.maxiVar.set(self.maxi)
         self.maxiEntr=Entry(self.op, textvariable=self.maxiVar, width=8)
         self.maxiEntr.grid(column=2, row=4)
-        self.maxiEntr.bind('<Return>', self.upDateOptions)
+        self.maxiEntr.bind('<KeyRelease>', self.upDateOptions)
         Label(self.op, text='Maximum value of the factors:').grid(column=0, \
                                                             row=4, columnspan=2)
 
@@ -83,17 +85,38 @@ class Game(Frame):
         self.entr.pack()
         self.entr.bind('<Return>', self.tryFact)
 
+        #time
+        self.labTime=Label(self, text=".00s", font=('Times', '14'))
+        self.labTime.pack()
+
         
         #pack itself
         self.pack()
 
+        #start time
+        self.after(10, self.timing)
+
+
     #start a new game
     def newGame(self, event=None):
         self.tries=0
-        self.nb, self.li=makeRandNb(self.nbPrimes, self.mini, self.maxi)
+        self.nb, self.li=makeRandNb(self.nbPrimes, self.mini, self.maxi+1)
         self.known=[]
         self.remain=self.nb
         self.upDate()
+        self.time=0
+        self.labTime.config(text='0')
+        if not self.running:
+            self.running=True
+            self.after(10, self.timing)
+
+    #update time
+    def timing(self, event=None):
+        if self.running:
+            self.time+=1
+            self.labTime.config(text=str(self.time)[:-2]+'.'\
+                                +str(self.time)[-2:]+'s')
+            self.after(10, self.timing)
 
     #make a try
     def tryFact(self, event=None):
@@ -133,6 +156,7 @@ class Game(Frame):
 
     #winner window
     def win(self, event=None):
+        self.running=False
         winWindow=Toplevel(None, bg='gold')
         winWindow.title('WINNER!')
         Label(winWindow, text='WINNER!', fg='red', bg='gold',\
@@ -148,6 +172,10 @@ class Game(Frame):
               font=('Helvetica', '24', 'italic')).pack()
         Label(winWindow, text='with {} tries ({} fails)'.format(self.tries, \
               self.tries-len(self.known)), fg='black', bg='gold', \
+              font=('Helvetica', '18')).pack()
+        Label(winWindow, text='within '+str(self.time)[:-2]+'.'+\
+              str(self.time)[-2:]+"sec", \
+              fg='red', bg='gold', \
               font=('Helvetica', '18')).pack()
 
     #rules window
@@ -174,9 +202,10 @@ Have fun !\n\
         Label(winWindow, text='More informations about us:', fg='white', \
               bg='black', font=('Times', '20', 'bold')).pack()
         more="""\n\
-   This game was created by Yohance Osborne, and\n\
+   This game was created in 2016 by Yohance Osborne, and\n\
 programmed by Paul Dubois,  bolth  in  1st  year  in\n\
-UCL (University College of London).\n\n\
+UCL (University College of London).\n\
+   The time has being added in 2018.\n\n\
 This game is coded in Python 3 & tkinter\n\n\n\
 \t\t\t\t#the unknown"""
         Label(winWindow, text=more, fg='white', justify='left',\
